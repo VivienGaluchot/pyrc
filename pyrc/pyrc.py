@@ -1,4 +1,3 @@
-#!python3
 import socket, time, select, sys
 from multiprocessing import Process, Queue
 from pyrc import internal

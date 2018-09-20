@@ -1,21 +1,24 @@
+#!python
 from pyrc import pyrc
+import time
 
 if __name__ == '__main__':
     username = "Pell"
     hostname = "Pell"
     servername = "Pell"
-    realname = "Pellgrain"
+    realname = "Pell"
     nick = "Pell"
     password = None
-    char = "#root-me_challenge"
+    chan = "#root-me_challenge"
 
-    pyrcCl = pyrc.PyrcClient()
-    pyrcCl.connect("irc.root-me.org", username, hostname, servername, realname, nick, password)
-    pyrcCl.joinChan(char)
+    client = pyrc.PyrcClient()
+    client.connect("irc.root-me.org", username, hostname, servername, realname, nick, password)
+    time.sleep(4)
+    client.joinChan(chan)
     try:
         while(1):
             to_send = input("")
-            pyrcCl.sendRaw(to_send + "\n")
+            client.sendRaw(to_send + "\n")
     except:
-        pyrcCl.disconnect()
+        client.disconnect()
         raise
