@@ -1,7 +1,6 @@
 #!python
 from pyrc import pyrc
-from threading import Thread
-import time, re, sys, traceback
+import re, sys, traceback
 
 
 def messageHandler(client, sentMsg, receivedMsg):

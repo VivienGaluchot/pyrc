@@ -1,5 +1,4 @@
-import socket, time, select, sys, traceback
-from multiprocessing import Process, Queue
+import socket, time, select, traceback
 
 def NonblockingGet(queue):
     try:

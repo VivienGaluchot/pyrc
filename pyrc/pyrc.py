@@ -1,4 +1,4 @@
-import socket, time, select, sys
+import time
 from multiprocessing import Process, Queue
 from pyrc import internal
 
@@ -45,7 +45,8 @@ class PyrcClient:
     def sendMsgToChan(self, msg):
         if self.chan != None:
             self.sendLine("PRIVMSG " + self.chan + " :" + msg)
-        print("No chan joined")
+        else:
+            print("No chan joined")
 
     def joinChan(self, chan):
         self.chan = chan
