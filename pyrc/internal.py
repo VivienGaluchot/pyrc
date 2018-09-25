@@ -24,10 +24,10 @@ def PyrcSocketHandler(stop_queue, send_msg_queue, server_ip, messageHandler, cli
                 try:
                     msg = raw_msg.decode("utf-8")
                     if len(msg) > 0:
-                        if msg.endswith("\n"):
-                            msg = msg[:-1]
+                        if not msg.endswith("\n"):
+                            msg.append("\n")
                         if msg.startswith("PING"):
-                            send_msg_queue.put("PONG")
+                            client.sendLine("PONG")
                         messageHandler(client, None, msg)
                 except:
                     print("Can't decode message in utf-8", msg)
@@ -35,8 +35,7 @@ def PyrcSocketHandler(stop_queue, send_msg_queue, server_ip, messageHandler, cli
             if ircsock in wlist:
                 msg = NonblockingGet(send_msg_queue)
                 if msg:
-                    msgLine = msg + "\n"
-                    ircsock.send(msgLine.encode("utf-8"))
+                    ircsock.send(msg.encode("utf-8"))
                     messageHandler(client, msg, None)
             # stop
             stop = NonblockingGet(stop_queue)

@@ -37,7 +37,7 @@ class PyrcClient:
 
     def sendLine(self, msg):
         assert(self.connected)
-        self.send_msg_queue.put(msg)
+        self.send_msg_queue.put(msg + "\n")
 
     def sendMsg(self, dest, msg):
         self.sendLine("PRIVMSG " + dest + " :" + msg)

@@ -5,9 +5,9 @@ import re, sys, traceback
 
 def messageHandler(client, sentMsg, receivedMsg):
     if sentMsg:
-        sys.stdout.write(" - Me  - -\n{}\n - - - - -\n".format(sentMsg))
+        sys.stdout.write(" - Me  - -\n{} - - - - -\n".format(sentMsg))
     if receivedMsg:
-        sys.stdout.write(" - Srv - -\n{}\n - - - - -\n".format(receivedMsg))
+        sys.stdout.write(" - Srv - -\n{} - - - - -\n".format(receivedMsg))
 
 
 if __name__ == '__main__':
@@ -21,8 +21,6 @@ if __name__ == '__main__':
 
     client = pyrc.PyrcClient()
     client.connect(messageHandler, server_ip, username, hostname, servername, realname, nick, password)
-
-    # client.joinChan("#root-me_challenge")
     try:
         while True:
             input_txt = input("")
