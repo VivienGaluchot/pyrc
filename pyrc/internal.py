@@ -25,11 +25,11 @@ def PyrcSocketHandler(stop_queue, send_msg_queue, server_ip, messageHandler, cli
                     msg = raw_msg.decode("utf-8")
                     if len(msg) > 0:
                         if not msg.endswith("\n"):
-                            msg.append("\n")
+                            msg = msg + "\n"
                         if msg.startswith("PING"):
                             client.sendLine("PONG")
                         messageHandler(client, None, msg)
-                except:
+                except UnicodeDecodeError:
                     print("Can't decode message in utf-8", msg)
             # send
             if ircsock in wlist:

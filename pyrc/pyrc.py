@@ -15,9 +15,9 @@ class PyrcClient:
 
     def connect(self, messageHandler, server_ip, username, hostname, servername, realname, nick, password):
         assert(not self.connected)
+        self.connected = True
         self.process = Process(target=internal.PyrcSocketHandler, args=(self.stop_queue, self.send_msg_queue, server_ip, messageHandler, self))
         self.process.start()
-        self.connected = True
         time.sleep(1)
         if password:
             self.sendLine("PASS {}".format(password))
