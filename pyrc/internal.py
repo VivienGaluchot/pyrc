@@ -1,4 +1,4 @@
-import socket, time, select, sys
+import socket, time, select, sys, traceback
 from multiprocessing import Process, Queue
 
 def NonblockingGet(queue):
@@ -10,7 +10,8 @@ def NonblockingGet(queue):
         else:
             raise
 
-def PyrcSocketHandler(stop_queue, send_msg_queue, server_ip):
+# messageHandler : function(client, sentMsg, receivedMsg)
+def PyrcSocketHandler(stop_queue, send_msg_queue, server_ip, messageHandler, client, debug=True):
     ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ircsock.connect((server_ip, 6667))
     ircsock.setblocking(False)
@@ -20,28 +21,31 @@ def PyrcSocketHandler(stop_queue, send_msg_queue, server_ip):
             rlist, wlist, elist = select.select([ircsock], [ircsock], [], 0.001)
             # receive
             if ircsock in rlist:
-                raw_msg = ircsock.recv(2048)
+                raw_msg = ircsock.recv(4096)
                 try:
                     msg = raw_msg.decode("utf-8")
+                    if len(msg) > 0:
+                        if msg.endswith("\n"):
+                            msg = msg[:-1]
+                        if msg.startswith("PING"):
+                            send_msg_queue.put("PONG")
+                        messageHandler(client, None, msg)
                 except:
-                    msg = raw_msg
-                if len(msg) > 0:
-                    if msg.startswith("PING"):
-                        send_msg_queue.put("PONG\n")
-                    if not msg.endswith("\n"):
-                        msg = msg + "\n"
-                    sys.stdout.write(" - Srv - -\n{} - - - - -\n".format(msg))
+                    print("Can't decode message in utf-8", msg)
             # send
             if ircsock in wlist:
                 msg = NonblockingGet(send_msg_queue)
                 if msg:
-                    ircsock.send(msg.encode("utf-8"))
-                    sys.stdout.write(" - Me  - -\n{} - - - - -\n".format(msg))
+                    msgLine = msg + "\n"
+                    ircsock.send(msgLine.encode("utf-8"))
+                    messageHandler(client, msg, None)
             # stop
             stop = NonblockingGet(stop_queue)
             if not stop:
                 stop = False
             # wait
             time.sleep(0.001)
+        except KeyboardInterrupt:
+            stop = True
         except:
             traceback.print_exc()

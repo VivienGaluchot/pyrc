@@ -1,38 +1,18 @@
 #!python
 from pyrc import pyrc
 from threading import Thread
-import time, re
-import traceback
+import time, re, sys, traceback
 
 
-class InputHandler(Thread):
-    def __init__(self, client):
-        Thread.__init__(self)
-        self.client = client
-
-    def run(self):
-        try:
-            while True:
-                input_txt = input("")
-                cmd_match = re.search(r"^/(\S+)\s*(.*)$", input_txt)
-                if cmd_match:
-                    cmd = cmd_match.group(1)
-                    cmd_args = cmd_match.group(2).split(" ")
-
-                    if cmd == "join" and len(cmd_args) > 0:
-                        self.client.joinChan(cmd_args[0])
-                    elif cmd == "quit":
-                        self.client.quitChan()
-                    if cmd == "whisp" and len(cmd_args) > 2:
-                        self.client.sendMsg(cmd_args[0], cmd_args[1:].join(" "))
-                else:
-                    self.client.sendMsgToChan(input_txt)
-        except:
-            traceback.print_exc()
-        print ("Quit InputHandler")
+def messageHandler(client, sentMsg, receivedMsg):
+    if sentMsg:
+        sys.stdout.write(" - Me  - -\n{}\n - - - - -\n".format(sentMsg))
+    if receivedMsg:
+        sys.stdout.write(" - Srv - -\n{}\n - - - - -\n".format(receivedMsg))
 
 
 if __name__ == '__main__':
+    server_ip = "irc.root-me.org"
     username = "Pell"
     hostname = "Pell"
     servername = "Pell"
@@ -41,13 +21,29 @@ if __name__ == '__main__':
     password = None
 
     client = pyrc.PyrcClient()
-    client.connect("irc.root-me.org", username, hostname, servername, realname, nick, password)
+    client.connect(messageHandler, server_ip, username, hostname, servername, realname, nick, password)
 
     # client.joinChan("#root-me_challenge")
     try:
-        inputHandler = InputHandler(client)
-        inputHandler.start()
-        inputHandler.join()
+        while True:
+            input_txt = input("")
+            cmd_match = re.search(r"^/(\S+)\s*(.*)$", input_txt)
+            if cmd_match:
+                cmd = cmd_match.group(1)
+                cmd_args = cmd_match.group(2).split(" ")
+
+                if cmd == "join" and len(cmd_args) > 0:
+                    client.joinChan(cmd_args[0])
+                elif cmd == "quit":
+                    client.quitChan()
+                elif cmd == "whisp" and len(cmd_args) > 1:
+                    client.sendMsg(cmd_args[0], " ".join(cmd_args[1:]))
+                elif cmd == "raw" and len(cmd_args) > 0:
+                    client.sendLine(" ".join(cmd_args))
+                else:
+                    print("Unkown command")
+            else:
+                client.sendMsgToChan(input_txt)
     except:
         traceback.print_exc()
 
