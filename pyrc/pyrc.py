@@ -4,6 +4,8 @@ from pyrc import internal
 
 class PyrcClient:
     def __init__(self):
+        # Irc
+        self.chan = None
         # Socket
         self.connected = False
         # Process
@@ -18,9 +20,9 @@ class PyrcClient:
         self.connected = True
         time.sleep(1)
         if password:
-            self.sendRaw("PASS {}\n".format(password))
-        self.sendRaw("NICK {}\n".format(nick))
-        self.sendRaw("USER {} {} {} :{}\n".format(username, hostname, servername, realname))
+            self.sendLine("PASS {}".format(password))
+        self.sendLine("NICK {}".format(nick))
+        self.sendLine("USER {} {} {} :{}".format(username, hostname, servername, realname))
 
     def disconnect(self):
         assert(self.connected)
@@ -33,18 +35,22 @@ class PyrcClient:
         self.process = None
         self.connected = False
 
-    def sendRaw(self, msg):
+    def sendLine(self, msg):
         assert(self.connected)
-        self.send_msg_queue.put(msg)
-
-    def ping(self, ):
-        self.sendRaw("PONG :pingis\n")
+        self.send_msg_queue.put(msg + "\n")
 
     def sendMsg(self, dest, msg):
-        self.sendRaw("PRIVMSG "+ dest +" :"+ msg +"\n")
+        self.sendLine("PRIVMSG " + dest + " :" + msg)
+
+    def sendMsgToChan(self, msg):
+        if self.chan != None:
+            self.sendLine("PRIVMSG " + self.chan + " :" + msg)
+        print("No chan joined")
 
     def joinChan(self, chan):
-        self.sendRaw("JOIN "+ chan +"\n")
+        self.chan = chan
+        self.sendLine("JOIN " + chan)
 
-    def quitChan(self, chan):
-        self.sendRaw("PART " + channel + "\r\n")
+    def quitChan(self):
+        self.sendLine("PART " + self.chan)
+        self.chan = None
